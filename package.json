@@ -1,0 +1,55 @@
+{
+  "name": "spam-filter-study",
+  "version": "1.0.0",
+  "description": "A project to rank popular spam filters",
+  "main": "gulpfile.js",
+  "scripts": {
+    "build": "./node_modules/.bin/gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mihi-r/spam-filter-study.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mihi-r/spam-filter-study/issues"
+  },
+  "homepage": "https://github.com/mihi-r/spam-filter-study#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.28",
+    "@typescript-eslint/eslint-plugin": "^4.15.1",
+    "@typescript-eslint/parser": "^4.15.1",
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-plugin-import": "^2.22.1",
+    "gulp": "^4.0.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "typescript": "^4.1.5"
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb-typescript",
+      "./tsconfig.json"
+    ],
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "rules": {
+      "@typescript-eslint/no-throw-literal": 0,
+      "@typescript-eslint/indent": 0,
+      "import/no-unresolved": 0,
+      "indent": [
+        "error",
+        4
+      ],
+      "import/prefer-default-export": 0,
+      "import/no-default-export": [
+        "error"
+      ]
+    },
+    "include": [
+      "src/**/*.ts"
+    ]
+  }
+}
