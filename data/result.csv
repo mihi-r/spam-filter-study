@@ -1,4 +1,4 @@
-﻿testCase,testLength,expectedOutput
+﻿testCase,testLength,expectedOutput,spam-filter_runtime,spam-filter_output
 0,short,spam
 1,short,spam
 2,short,spam
