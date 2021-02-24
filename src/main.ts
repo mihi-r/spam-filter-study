@@ -57,6 +57,9 @@ function importData(): string[] {
 // TODO: Implement: https://npm.io/package/profanease
 // A lightweight javascript detector and filter for profanity words / bad words written in typescript
 
+/**
+ * The main function.
+ */
 function main() {
     importData();
 }
