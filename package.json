@@ -5,7 +5,7 @@
   "main": "gulpfile.js",
   "scripts": {
     "build": "./node_modules/.bin/gulp",
-    "start": "./build/main.js"
+    "start": "./node_modules/.bin/gulp ; node ./build/main.js"
   },
   "repository": {
     "type": "git",
