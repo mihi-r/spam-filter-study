@@ -15,7 +15,6 @@ function importData(): string[] {
     testArray.map((testCase: string) => {
         return Buffer.from(testCase, 'base64').toString('utf8');
     })
-    console.log('hu');
     return testArray;
 }
 
