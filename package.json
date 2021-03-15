@@ -52,5 +52,8 @@
     "include": [
       "src/**/*.ts"
     ]
+  },
+  "dependencies": {
+    "spamc": "0.0.5"
   }
 }
