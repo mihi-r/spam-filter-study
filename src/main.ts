@@ -12,10 +12,10 @@ const fs = require('fs');
  */
 function importData(): string[] {
     const testArray = fs.readFileSync('./data/test-text.txt').toString().split('\n');
-    testArray.map((testCase: string) => {
+    const stringArray = testArray.map((testCase: string) => {
         return Buffer.from(testCase, 'base64').toString('utf8');
-    })
-    return testArray;
+    });
+    return stringArray;
 }
 
 // TODO: Implement https://www.npmjs.com/package/spam-filter
