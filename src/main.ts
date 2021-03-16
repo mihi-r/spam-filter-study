@@ -22,6 +22,7 @@ const swearjar = require('swearjar');
 const csv = require('csv-parser');
 const { Parser } = require('json2csv');
 const spamcheck = require('spam-detection');
+const filter = require('spam-filter')();
 
 enum CsvColumnName {
     TestCase = "testCase",
@@ -88,8 +89,19 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
     })
 }
 
-// TODO: Implement https://www.npmjs.com/package/spam-filter
-// This spam filter lets you choose between using naive Bayes classifier or Fisher's method.
+/**
+ * Implement https://www.npmjs.com/package/spam-filter
+ * This spam filter lets you choose between using naive Bayes classifier or Fisher's method.
+ * @param data The data.
+ * @returns Array of valid or spam results for each test case.
+ */
+function runSpamFilter(data: string[]) {
+    const results = data.map((testCase) => {
+        return filter.isSpam(testCase) ? 'spam' : 'valid';
+    });
+
+    return results;
+}
 
 // TODO: Implement: https://www.npmjs.com/package/spam-check
 // A simple node module for checking for spam in user inputs
@@ -296,6 +308,9 @@ async function main() {
 
     results = runRetextProfanities(data);
     await addToCsv(CsvColumnName.RetextProfanitiesOutput, results);
+
+    results = runSpamFilter(data);
+    await addToCsv(CsvColumnName.SpamFilterOutput, results);
 }
 
 main();
