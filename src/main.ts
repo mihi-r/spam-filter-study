@@ -90,7 +90,7 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
  */
 async function runSpamDetection(data: string[]) {
     const results = data.map((value) => {
-        return spamcheck.detect(value);
+        return spamcheck.detect(value) === 'spam' ? 'spam' : 'valid';
     });
     await addToCsv(CsvColumnName.SpamDetectionOutput, results);
 }
