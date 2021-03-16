@@ -100,8 +100,12 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 // TODO: Implement: https://npm.io/package/retext-profanities
 // retext plugin to check for profane and vulgar wording. Uses cuss for sureness.
 
-// TODO: Implement: https://npm.io/package/swearjar
-// Profanity detection and filtering library.
+/**
+ * Profanity detection and filtering library.
+ * @return pushes the current test case's result to the new array to be pushed to the csv.
+ * @param stringArray is the array of test cases to be ran through the filter
+ */
+// 
 function runSwearJar(stringArray: string[]) {
     const swearJarArray = stringArray.map((testCase: string) => {
         var result = swearjar.profane(testCase);
@@ -115,14 +119,14 @@ function runSwearJar(stringArray: string[]) {
 
         console.log(result);
      });
-    console.log("------- Swear Jar Filter -------")  
-    console.log(swearJarArray);
-    console.log("\n");
+    addToCsv(CsvColumnName.SwearjarOutput, swearJarArray);
 }
 
-
-// TODO: Implement: https://npm.io/package/censor-sensor
-// A better profanity filter.
+/**
+ * A better profanity filter.
+ * @return pushes the current test case's result to the new array to be pushed to the csv.
+ * @param stringArray is the array of test cases to be ran through the filter
+ */
 function runCensorSensor(stringArray: string[]) {
     const censorSensorArray = stringArray.map((testCase: string) => {
         var result = censorSensor.isProfane(testCase)
@@ -136,17 +140,14 @@ function runCensorSensor(stringArray: string[]) {
 
         console.log(result);
      });
-    console.log("------- Censor-Sensor Filter -------")  
-    console.log(censorSensorArray);
-    console.log("\n");
+    addToCsv(CsvColumnName.CensorSensorOutput, censorSensorArray);
 }
 
-// TODO: Implement: https://npm.io/package/google-profanity-words
-// Full List of Bad Words and Top Swear Words Banned by Google. As they closed the api (will most likely be used in conjuntion with other spam filters)
-
-
-// TODO: Implement: https://npm.io/package/noswearing
-// An advanced profanity filter based on English phonetics (how stuff sounds).
+/**
+ * An advanced profanity filter based on English phonetics (how stuff sounds).
+ * @return pushes the current test case's result to the new array to be pushed to the csv.
+ * @param stringArray is the array of test cases to be ran through the filter
+ */
 function runNoSwearing(stringArray: string[]) {
     const noSwearingArray = stringArray.map((testCase: string) => {
         var result = noSwearing(testCase);
@@ -157,15 +158,15 @@ function runNoSwearing(stringArray: string[]) {
             return "spam"
         }
       });
-    console.log("------- No Swearing Filter -------")  
-    console.log(noSwearingArray);
-    console.log("\n");
+    addToCsv(CsvColumnName.NoswearingOutput, noSwearingArray);
 }
 
-
-// TODO: Implement: https://npm.io/package/profanease
-// A lightweight javascript detector and filter for profanity words / bad words written in typescript
-function runProfanease(stringArray: string[]) {
+/**
+ * A lightweight javascript detector and filter for profanity words / bad words written in typescript
+ * @return pushes the current test case's result to the new array to be pushed to the csv.
+ * @param stringArray is the array of test cases to be ran through the filter
+ */
+function runProfanease(stringArray: string[]): void{
     var isProfane = new Profanease({lang : 'all'});
     const profaneseArray = stringArray.map((testCase: string) => {
         if (isProfane.check(testCase) == true) {
@@ -175,9 +176,7 @@ function runProfanease(stringArray: string[]) {
             return "valid"
         }
       });
-    console.log("------- Profanease Filter -------")  
-    console.log(profaneseArray);
-    console.log("\n");
+    addToCsv(CsvColumnName.ProfaneaseOutput, profaneseArray);
 }
 
 
@@ -190,8 +189,8 @@ function runProfanease(stringArray: string[]) {
 function main() {
     const stringArray: string[] = importData();
     runProfanease(stringArray);
-    runNoSwearing(stringArray);
-    runSwearJar(stringArray);
+    //runNoSwearing(stringArray);
+    //runSwearJar(stringArray);
     //runCensorSensor(stringArray); doesnt work, idk why it doesnt recongize the function used for this package
 }
 
