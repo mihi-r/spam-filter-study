@@ -107,39 +107,41 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 
 // }
 
-// TODO: Implement: https://www.npmjs.com/package/bad-words
-// A javascript filter for badwords 
+/**
+ * Implement: https://www.npmjs.com/package/bad-words
+ * A javascript filter for badwords
+ * @param testArray The array of test cases to test the package
+ */ 
 
 function runBadWords(testArray: string[]): void {
     const bad_words = new badWords();
     const results = testArray.map((testCase: string) => {
-        return bad_words.isProfane(testCase);
+        return (bad_words.isProfane(testCase)) ? 'Spam' : 'Valid';
     });
 
-    console.log(results);
-
-    bad_words.addWords(...googleProfanityWords.list())
-    const resultsWithGoogle = testArray.map((testCase: string) => {
-        return bad_words.isProfane(testCase);
-    });
-
-    console.log(resultsWithGoogle);
+    addToCsv(CsvColumnName.BadWordsOutput, results);
 }
 
-// TODO: Implement: https://www.npmjs.com/package/leo-profanity
-// Profanity filter, based on "Shutterstock" dictionary
+/**
+ * Implement: https://www.npmjs.com/package/leo-profanity
+ * Profanity filter, based on "Shutterstock" dictionary
+ * @param testArray The array of test cases to test the package
+ */ 
 
 function runLeoProfanity(testArray: string[]): void {
 
     const results = testArray.map((testCase: string) => {
-        return leo.check(testCase);
+        return (leo.check(testCase)) ? 'Spam' : 'Valid';
     });
 
-    console.log(results);
+    addToCsv(CsvColumnName.LeoProfanitiesOutput, results);
 }
 
-// TODO: Implement: https://npm.io/package/retext-profanities
-// retext plugin to check for profane and vulgar wording. Uses cuss for sureness.
+/**
+ * Implement: https://npm.io/package/retext-profanities
+ * retext plugin to check for profane and vulgar wording. Uses cuss for sureness.
+ * @param testArray The array of test cases to test the package
+ */ 
 
 function runRetextProfanities(testArray: string[]): void {
     const results: string[] = [];
@@ -153,7 +155,8 @@ function runRetextProfanities(testArray: string[]): void {
             results.push((warnings.test(report(output))) ? 'Spam' : 'Valid');
         })
     );
-    console.log(results);
+
+    addToCsv(CsvColumnName.RetextProfanitiesOutput, results);
     
 }
 
@@ -177,8 +180,8 @@ function runRetextProfanities(testArray: string[]): void {
  */
 function main() {
     const stringArray = importData();
-    // runBadWords(stringArray);
-    // runLeoProfanity(stringArray);
+    runBadWords(stringArray);
+    runLeoProfanity(stringArray);
     runRetextProfanities(stringArray);
 
 }
