@@ -23,6 +23,7 @@ const csv = require('csv-parser');
 const { Parser } = require('json2csv');
 const spamcheck = require('spam-detection');
 const filter = require('spam-filter')();
+const spamCheck = require('spam-check');
 
 enum CsvColumnName {
     TestCase = "testCase",
@@ -103,9 +104,24 @@ function runSpamFilter(data: string[]) {
     return results;
 }
 
-// TODO: Implement: https://www.npmjs.com/package/spam-check
+/**
+ * Implement: https://www.npmjs.com/package/spam-check
 // A simple node module for checking for spam in user inputs
+ * @param data The data.
+ * @returns Array of valid or spam results for each test case.
+ */
+function runSpamCheck(data: string[]) {
+    const results = data.map((testCase) => {
+        let result: string = '';
 
+        spamCheck({ 'string':testCase }, function(_err: any, checkResult: { spam: boolean }) {
+            result = checkResult.spam ? 'spam' : 'valid';
+        });
+        return result;
+    });
+
+    return results;
+}
 
 // TODO: Implement: https://www.npmjs.com/package/akismet-api
 // Full Nodejs bindings to the Akismet (https://akismet.com) spam detection service.
@@ -311,6 +327,9 @@ async function main() {
 
     results = runSpamFilter(data);
     await addToCsv(CsvColumnName.SpamFilterOutput, results);
+
+    results = runSpamCheck(data);
+    await addToCsv(CsvColumnName.SpamCheckOutput, results);
 }
 
 main();
