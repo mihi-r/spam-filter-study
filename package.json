@@ -54,6 +54,15 @@
     ]
   },
   "dependencies": {
-    "spamc": "0.0.5"
+    "bad-words": "^3.0.4",
+    "google-profanity-words": "^1.0.0",
+    "leo-profanity": "^1.3.0",
+    "retext-english": "^3.0.4",
+    "retext-profanities": "^6.1.0",
+    "retext-stringify": "^2.0.4",
+    "spamc": "0.0.5",
+    "to-vfile": "^6.1.0",
+    "unified": "^9.2.1",
+    "vfile-reporter": "^6.0.2"
   }
 }

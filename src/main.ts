@@ -5,6 +5,16 @@
 // 5. Each spam filter function should write to the CSV with its result
 
 const fs = require('fs');
+const spamc = require('spamc');
+const badWords = require('bad-words');
+const googleProfanityWords = require('google-profanity-words');
+const leo = require('leo-profanity');
+const vfile = require('to-vfile');
+const report = require('vfile-reporter');
+const unified = require('unified');
+const english = require('retext-english');
+const stringify = require('retext-stringify');
+const profanities = require('retext-profanities');
 
 /**
  * Import data from test-text.txt and convert each string from base64 encoding to UTF8.
@@ -33,14 +43,67 @@ function importData(): string[] {
 // TODO: Implement: https://www.npmjs.com/package/spamc
 // spamc is a nodejs module that connects to spamassassin's spamd daemon using the spamc interface.
 
+// function runSpamc(testArray: string[]): void{
+//     const Spamc = new spamc();
+//     // const results = testArray.map((testCase: string) => {
+        
+//     // });
+//     Spamc.report(testArray[0], function (result: string[]) {
+//         console.log(result)
+//     })
+
+
+// }
+
 // TODO: Implement: https://www.npmjs.com/package/bad-words
 // A javascript filter for badwords 
+
+function runBadWords(testArray: string[]): void {
+    const bad_words = new badWords();
+    const results = testArray.map((testCase: string) => {
+        return bad_words.isProfane(testCase);
+    });
+
+    console.log(results);
+
+    bad_words.addWords(...googleProfanityWords.list())
+    const resultsWithGoogle = testArray.map((testCase: string) => {
+        return bad_words.isProfane(testCase);
+    });
+
+    console.log(resultsWithGoogle);
+}
 
 // TODO: Implement: https://www.npmjs.com/package/leo-profanity
 // Profanity filter, based on "Shutterstock" dictionary
 
+function runLeoProfanity(testArray: string[]): void {
+
+    const results = testArray.map((testCase: string) => {
+        return leo.check(testCase);
+    });
+
+    console.log(results);
+}
+
 // TODO: Implement: https://npm.io/package/retext-profanities
 // retext plugin to check for profane and vulgar wording. Uses cuss for sureness.
+
+function runRetextProfanities(testArray: string[]): void {
+    const results: string[] = [];
+    testArray.forEach(testCase =>
+        unified()
+        .use(english)
+        .use(profanities)
+        .use(stringify)
+        .process(testCase, function(err: string, output: string) {
+            const warnings = new RegExp(/\bwarnings|warning\b/g);
+            results.push((warnings.test(report(output))) ? 'Spam' : 'Valid');
+        })
+    );
+    console.log(results);
+    
+}
 
 // TODO: Implement: https://npm.io/package/swearjar
 // Profanity detection and filtering library.
@@ -61,7 +124,11 @@ function importData(): string[] {
  * The main function.
  */
 function main() {
-    importData();
+    const stringArray = importData();
+    // runBadWords(stringArray);
+    // runLeoProfanity(stringArray);
+    runRetextProfanities(stringArray);
+
 }
 
 main();
