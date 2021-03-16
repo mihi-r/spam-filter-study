@@ -195,9 +195,6 @@ async function runProfanease(stringArray: string[]) {
 /**
  * The main function.
  */
-
-    
-    
 async function main() {
     const stringArray: string[] = importData();
     await runProfanease(stringArray);
