@@ -95,7 +95,7 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
 
 /**
  * Implement: https://www.npmjs.com/package/spam-detection
-// Small package based on Naive Bayes classifier to classify messages as spam or ham.
+ * Small package based on Naive Bayes classifier to classify messages as spam or ham.
  * @param data The data.
  */
 async function runSpamDetection(data: string[]) {
