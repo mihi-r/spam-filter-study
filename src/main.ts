@@ -117,10 +117,9 @@ async function runSpamDetection(data: string[]) {
  * Profanity detection and filtering library.
  * @param stringArray is the array of test cases to be ran through the filter
  */
-// 
 async function runSwearJar(stringArray: string[]) {
     const swearJarArray = stringArray.map((testCase: string) => {
-        var result = swearjar.profane(testCase);
+        let result = swearjar.profane(testCase);
 
         if (result == true) {
             return "spam"
@@ -140,7 +139,7 @@ async function runSwearJar(stringArray: string[]) {
  */
  async function runCensorSensor(stringArray: string[]) {
     const censorSensorArray = stringArray.map((testCase: string) => {
-        var result = censorSensor.isProfane(testCase)
+        let result = censorSensor.isProfane(testCase)
 
         if (result == true) {
             return "spam"
@@ -160,7 +159,8 @@ async function runSwearJar(stringArray: string[]) {
  */
  async function runNoSwearing(stringArray: string[]) {
     const noSwearingArray = stringArray.map((testCase: string) => {
-        var result = noSwearing(testCase);
+        let result = noSwearing(testCase);
+
         if (result.length == 0) {
             return "valid"
         }
@@ -176,7 +176,7 @@ async function runSwearJar(stringArray: string[]) {
  * @param stringArray is the array of test cases to be ran through the filter
  */
 async function runProfanease(stringArray: string[]) {
-    var isProfane = new Profanease({lang : 'all'});
+    let isProfane = new Profanease({lang : 'all'});
     const profaneseArray = stringArray.map((testCase: string) => {
         if (isProfane.check(testCase) == true) {
             return "spam"
