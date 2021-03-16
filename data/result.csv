@@ -18,4 +18,4 @@ testCase,testLength,expectedOutput,spam-filter_runtime,spam-filter_output,spam-c
 16,short,spam,,,,,,,,,,,,,,,,,,,,,,,,
 17,long,spam,,,,,,,,,,,,,,,,,,,,,,,,
 18,long,valid,,,,,,,,,,,,,,,,,,,,,,,,
-19,short,short,,,,,,,,,,,,,,,,,,,,,,,,
+19,short,valid,,,,,,,,,,,,,,,,,,,,,,,,
