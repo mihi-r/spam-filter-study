@@ -105,7 +105,7 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
  * @param stringArray is the array of test cases to be ran through the filter
  */
 // 
-function runSwearJar(stringArray: string[]) {
+function runSwearJar(stringArray: string[]): void {
     const swearJarArray = stringArray.map((testCase: string) => {
         var result = swearjar.profane(testCase);
 
@@ -125,7 +125,7 @@ function runSwearJar(stringArray: string[]) {
  * A better profanity filter.
  * @param stringArray is the array of test cases to be ran through the filter
  */
-function runCensorSensor(stringArray: string[]) {
+function runCensorSensor(stringArray: string[]): void {
     const censorSensorArray = stringArray.map((testCase: string) => {
         var result = censorSensor.isProfane(testCase)
 
@@ -145,7 +145,7 @@ function runCensorSensor(stringArray: string[]) {
  * An advanced profanity filter based on English phonetics (how stuff sounds).
  * @param stringArray is the array of test cases to be ran through the filter
  */
-function runNoSwearing(stringArray: string[]) {
+function runNoSwearing(stringArray: string[]): void {
     const noSwearingArray = stringArray.map((testCase: string) => {
         var result = noSwearing(testCase);
         if (result.length == 0) {
