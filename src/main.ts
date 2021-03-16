@@ -185,7 +185,7 @@ function runRetextProfanities(data: string[]) {
  */
 function runSwearJar(data: string[]) {
     const results = data.map((testCase: string) => {
-        let result = swearjar.profane(testCase);
+        const result = swearjar.profane(testCase);
 
         if (result == true) {
             return "spam"
@@ -207,9 +207,8 @@ function runSwearJar(data: string[]) {
  */
 function runCensorSensor(data: string[]) {
     const censor = new censorSensor.CensorSensor();
-    console.log(censor);
     const results = data.map((testCase: string) => {
-        let result = censor.isProfane(testCase)
+        const result = censor.isProfane(testCase)
 
         if (result == true) {
             return "spam"
@@ -220,7 +219,6 @@ function runCensorSensor(data: string[]) {
 
         
     });
-    console.log(results);
     return results;
 }
 
@@ -231,7 +229,7 @@ function runCensorSensor(data: string[]) {
  */
 function runNoSwearing(data: string[]) {
     const results = data.map((testCase: string) => {
-        let result = noSwearing(testCase);
+        const result = noSwearing(testCase);
 
         if (result.length == 0) {
             return "valid"
