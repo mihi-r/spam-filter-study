@@ -116,7 +116,7 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 function runBadWords(testArray: string[]): void {
     const bad_words = new badWords();
     const results = testArray.map((testCase: string) => {
-        return (bad_words.isProfane(testCase)) ? 'Spam' : 'Valid';
+        return (bad_words.isProfane(testCase)) ? 'spam' : 'valid';
     });
 
     addToCsv(CsvColumnName.BadWordsOutput, results);
@@ -131,7 +131,7 @@ function runBadWords(testArray: string[]): void {
 function runLeoProfanity(testArray: string[]): void {
 
     const results = testArray.map((testCase: string) => {
-        return (leo.check(testCase)) ? 'Spam' : 'Valid';
+        return (leo.check(testCase)) ? 'spam' : 'valid';
     });
 
     addToCsv(CsvColumnName.LeoProfanitiesOutput, results);
@@ -152,7 +152,7 @@ function runRetextProfanities(testArray: string[]): void {
         .use(stringify)
         .process(testCase, function(err: string, output: string) {
             const warnings = new RegExp(/\bwarnings|warning\b/g);
-            results.push((warnings.test(report(output))) ? 'Spam' : 'Valid');
+            results.push((warnings.test(report(output))) ? 'spam' : 'valid');
         })
     );
 
