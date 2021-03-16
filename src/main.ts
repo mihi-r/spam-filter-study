@@ -102,7 +102,6 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 
 /**
  * Profanity detection and filtering library.
- * @return pushes the current test case's result to the new array to be pushed to the csv.
  * @param stringArray is the array of test cases to be ran through the filter
  */
 // 
@@ -124,7 +123,6 @@ function runSwearJar(stringArray: string[]) {
 
 /**
  * A better profanity filter.
- * @return pushes the current test case's result to the new array to be pushed to the csv.
  * @param stringArray is the array of test cases to be ran through the filter
  */
 function runCensorSensor(stringArray: string[]) {
@@ -145,7 +143,6 @@ function runCensorSensor(stringArray: string[]) {
 
 /**
  * An advanced profanity filter based on English phonetics (how stuff sounds).
- * @return pushes the current test case's result to the new array to be pushed to the csv.
  * @param stringArray is the array of test cases to be ran through the filter
  */
 function runNoSwearing(stringArray: string[]) {
@@ -163,7 +160,6 @@ function runNoSwearing(stringArray: string[]) {
 
 /**
  * A lightweight javascript detector and filter for profanity words / bad words written in typescript
- * @return pushes the current test case's result to the new array to be pushed to the csv.
  * @param stringArray is the array of test cases to be ran through the filter
  */
 function runProfanease(stringArray: string[]): void{
@@ -189,8 +185,8 @@ function runProfanease(stringArray: string[]): void{
 function main() {
     const stringArray: string[] = importData();
     runProfanease(stringArray);
-    //runNoSwearing(stringArray);
-    //runSwearJar(stringArray);
+    runNoSwearing(stringArray);
+    runSwearJar(stringArray);
     //runCensorSensor(stringArray); doesnt work, idk why it doesnt recongize the function used for this package
 }
 
