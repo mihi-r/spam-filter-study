@@ -55,6 +55,12 @@
     ]
   },
   "dependencies": {
+    "censor-sensor": "^1.0.6",
+    "noswearing": "^1.2.0",
+    "profanease": "^1.1.2",
+    "spam-check": "^1.0.0",
+    "spam_detecter": "^1.0.2",
+    "swearjar": "^0.2.0",
     "csv-parser": "^3.0.0",
     "json2csv": "^5.0.6",
     "spam-detection": "^1.0.3"
