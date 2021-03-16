@@ -5,6 +5,12 @@
 // 5. Each spam filter function should write to the CSV with its result
 
 const fs = require('fs');
+const Profanease = require('profanease');
+const noSwearing = require("noswearing");
+const censorSensor = require('censor-sensor');
+var swearjar = require('swearjar');
+
+
 
 /**
  * Import data from test-text.txt and convert each string from base64 encoding to UTF8.
@@ -24,11 +30,13 @@ function importData(): string[] {
 // TODO: Implement: https://www.npmjs.com/package/spam-check
 // A simple node module for checking for spam in user inputs
 
+
 // TODO: Implement: https://www.npmjs.com/package/akismet-api
 // Full Nodejs bindings to the Akismet (https://akismet.com) spam detection service.
 
 // TODO: Implement: https://www.npmjs.com/package/spam_detecter
 // Small package based on Naive Bayes classifier to classify messages as spam or ham.
+
 
 // TODO: Implement: https://www.npmjs.com/package/spamc
 // spamc is a nodejs module that connects to spamassassin's spamd daemon using the spamc interface.
@@ -44,24 +52,94 @@ function importData(): string[] {
 
 // TODO: Implement: https://npm.io/package/swearjar
 // Profanity detection and filtering library.
+function runSwearJar(stringArray: string[]) {
+    const swearJarArray = stringArray.map((testCase: string) => {
+        var result = swearjar.profane(testCase);
+
+        if (result == true) {
+            return "spam"
+        }
+        if (result == false) {
+            return "valid"
+        }
+
+        console.log(result);
+     });
+    console.log("------- Swear Jar Filter -------")  
+    console.log(swearJarArray);
+    console.log("\n");
+}
+
 
 // TODO: Implement: https://npm.io/package/censor-sensor
 // A better profanity filter.
+function runCensorSensor(stringArray: string[]) {
+    const censorSensorArray = stringArray.map((testCase: string) => {
+        var result = censorSensor.isProfane(testCase)
+
+        if (result == true) {
+            return "spam"
+        }
+        if (result == false) {
+            return "valid"
+        }
+
+        console.log(result);
+     });
+    console.log("------- Censor-Sensor Filter -------")  
+    console.log(censorSensorArray);
+    console.log("\n");
+}
 
 // TODO: Implement: https://npm.io/package/google-profanity-words
 // Full List of Bad Words and Top Swear Words Banned by Google. As they closed the api (will most likely be used in conjuntion with other spam filters)
 
+
 // TODO: Implement: https://npm.io/package/noswearing
 // An advanced profanity filter based on English phonetics (how stuff sounds).
+function runNoSwearing(stringArray: string[]) {
+    const noSwearingArray = stringArray.map((testCase: string) => {
+        var result = noSwearing(testCase);
+        if (result.length == 0) {
+            return "valid"
+        }
+        if (result.length >= 1) {
+            return "spam"
+        }
+      });
+    console.log("------- No Swearing Filter -------")  
+    console.log(noSwearingArray);
+    console.log("\n");
+}
+
 
 // TODO: Implement: https://npm.io/package/profanease
 // A lightweight javascript detector and filter for profanity words / bad words written in typescript
+function runProfanease(stringArray: string[]) {
+    var isProfane = new Profanease({lang : 'all'});
+    const profaneseArray = stringArray.map((testCase: string) => {
+        if (isProfane.check(testCase) == true) {
+            return "spam"
+        }
+        if (isProfane.check(testCase) == false) {
+            return "valid"
+        }
+      });
+    console.log("------- Profanease Filter -------")  
+    console.log(profaneseArray);
+    console.log("\n");
+}
+
 
 /**
  * The main function.
  */
 function main() {
-    importData();
+    const stringArray: string[] = importData();
+    runProfanease(stringArray);
+    runNoSwearing(stringArray);
+    runSwearJar(stringArray);
+    //runCensorSensor(stringArray); doesnt work, idk why it doesnt recongize the function used for this package
 }
 
 main();
