@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/mihi-r/spam-filter-study#readme",
   "devDependencies": {
+    "@types/json2csv": "^5.0.1",
     "@types/node": "^14.14.28",
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
@@ -59,6 +60,8 @@
     "profanease": "^1.1.2",
     "spam-check": "^1.0.0",
     "spam_detecter": "^1.0.2",
-    "swearjar": "^0.2.0"
+    "swearjar": "^0.2.0",
+    "csv-parser": "^3.0.0",
+    "json2csv": "^5.0.6"
   }
 }
