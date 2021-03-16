@@ -11,6 +11,7 @@ const censorSensor = require('censor-sensor');
 const swearjar = require('swearjar');
 const csv = require('csv-parser');
 const { Parser } = require('json2csv');
+const spamcheck = require('spam-detection');
 
 enum CsvColumnName {
     TestCase = "testCase",
@@ -22,8 +23,8 @@ enum CsvColumnName {
     SpamCheckOutput = "spam-check_output",
     AkismetApiRuntime = "akismet-api_runtime",
     AkismetApiOutput = "akismet-api_output",
-    SpamDectectorRuntime = "spam_dectector_runtime",
-    SpamDectectorOutput = "spam_dectector_output",
+    SpamDetectionRuntime = "spam_detection_runtime",
+    SpamDetectionOutput = "spam_detection_output",
     SpamcRuntime = "spamc_runtime",
     SpamcOutput = "spamc_output",
     BadWordsRuntime = "bad-words_runtime",
@@ -59,19 +60,22 @@ function importData(): string[] {
  * @param columnName The column name to add the data to.
  * @param columnValues The data to add.
  */
-function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
-    const allData: string[] = [];
-    fs.createReadStream('./data/result.csv')
-        .pipe(csv())
-        .on('data', function (data: any) {
-            data[columnName] = columnValues[Number(data.testCase)];
-            allData.push(data);
-        })
-        .on('end', function(){
-            const parser = new Parser({ fields: Object.keys(allData[0]) });
-            const newCsv = parser.parse(allData);
-            fs.writeFileSync('./data/result.csv', newCsv);
-        });
+function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
+    return new Promise<void>((resolve) => {
+        const allData: string[] = [];
+        fs.createReadStream('./data/result.csv')
+            .pipe(csv())
+            .on('data', function (data: any) {
+                data[columnName] = columnValues[Number(data.testCase)];
+                allData.push(data);
+            })
+            .on('end', function(){
+                const parser = new Parser({ fields: Object.keys(allData[0]) });
+                const newCsv = parser.parse(allData);
+                fs.writeFileSync('./data/result.csv', newCsv);
+                resolve();
+            });
+    })
 }
 
 // TODO: Implement https://www.npmjs.com/package/spam-filter
@@ -84,8 +88,17 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 // TODO: Implement: https://www.npmjs.com/package/akismet-api
 // Full Nodejs bindings to the Akismet (https://akismet.com) spam detection service.
 
-// TODO: Implement: https://www.npmjs.com/package/spam_detecter
+/**
+ * Implement: https://www.npmjs.com/package/spam-detection
 // Small package based on Naive Bayes classifier to classify messages as spam or ham.
+ * @param data The data.
+ */
+async function runSpamDetection(data: string[]) {
+    const results = data.map((value) => {
+        return spamcheck.detect(value) === 'spam' ? 'spam' : 'valid';
+    });
+    await addToCsv(CsvColumnName.SpamDetectionOutput, results);
+}
 
 
 // TODO: Implement: https://www.npmjs.com/package/spamc
@@ -105,7 +118,7 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
  * @param stringArray is the array of test cases to be ran through the filter
  */
 // 
-function runSwearJar(stringArray: string[]): void {
+async function runSwearJar(stringArray: string[]) {
     const swearJarArray = stringArray.map((testCase: string) => {
         var result = swearjar.profane(testCase);
 
@@ -118,14 +131,14 @@ function runSwearJar(stringArray: string[]): void {
 
         console.log(result);
      });
-    addToCsv(CsvColumnName.SwearjarOutput, swearJarArray);
+    await addToCsv(CsvColumnName.SwearjarOutput, swearJarArray);
 }
 
 /**
  * A better profanity filter.
  * @param stringArray is the array of test cases to be ran through the filter
  */
-function runCensorSensor(stringArray: string[]): void {
+ async function runCensorSensor(stringArray: string[]) {
     const censorSensorArray = stringArray.map((testCase: string) => {
         var result = censorSensor.isProfane(testCase)
 
@@ -138,14 +151,14 @@ function runCensorSensor(stringArray: string[]): void {
 
         console.log(result);
      });
-    addToCsv(CsvColumnName.CensorSensorOutput, censorSensorArray);
+    await addToCsv(CsvColumnName.CensorSensorOutput, censorSensorArray);
 }
 
 /**
  * An advanced profanity filter based on English phonetics (how stuff sounds).
  * @param stringArray is the array of test cases to be ran through the filter
  */
-function runNoSwearing(stringArray: string[]): void {
+ async function runNoSwearing(stringArray: string[]) {
     const noSwearingArray = stringArray.map((testCase: string) => {
         var result = noSwearing(testCase);
         if (result.length == 0) {
@@ -155,14 +168,14 @@ function runNoSwearing(stringArray: string[]): void {
             return "spam"
         }
       });
-    addToCsv(CsvColumnName.NoswearingOutput, noSwearingArray);
+    await addToCsv(CsvColumnName.NoswearingOutput, noSwearingArray);
 }
 
 /**
  * A lightweight javascript detector and filter for profanity words / bad words written in typescript
  * @param stringArray is the array of test cases to be ran through the filter
  */
-function runProfanease(stringArray: string[]): void{
+async function runProfanease(stringArray: string[]) {
     var isProfane = new Profanease({lang : 'all'});
     const profaneseArray = stringArray.map((testCase: string) => {
         if (isProfane.check(testCase) == true) {
@@ -172,7 +185,7 @@ function runProfanease(stringArray: string[]): void{
             return "valid"
         }
       });
-    addToCsv(CsvColumnName.ProfaneaseOutput, profaneseArray);
+    await addToCsv(CsvColumnName.ProfaneaseOutput, profaneseArray);
 }
 
 
@@ -182,12 +195,17 @@ function runProfanease(stringArray: string[]): void{
 /**
  * The main function.
  */
-function main() {
+
+    
+    
+async function main() {
     const stringArray: string[] = importData();
-    runProfanease(stringArray);
-    runNoSwearing(stringArray);
-    runSwearJar(stringArray);
-    //runCensorSensor(stringArray); doesnt work, idk why it doesnt recongize the function used for this package
+    await runProfanease(stringArray);
+    await runNoSwearing(stringArray);
+    await runSwearJar(stringArray);
+    //await runCensorSensor(stringArray); doesnt work, idk why it doesnt recongize the function used for this package
+    const data = importData();
+    await runSpamDetection(data);
 }
 
 main();
