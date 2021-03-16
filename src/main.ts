@@ -206,8 +206,10 @@ function runSwearJar(data: string[]) {
  * @returns Array of valid or spam results for each test case.
  */
 function runCensorSensor(data: string[]) {
+    const censor = new censorSensor.CensorSensor();
+    console.log(censor);
     const results = data.map((testCase: string) => {
-        let result = censorSensor.isProfane(testCase)
+        let result = censor.isProfane(testCase)
 
         if (result == true) {
             return "spam"
@@ -216,9 +218,9 @@ function runCensorSensor(data: string[]) {
             return "valid"
         }
 
-        console.log(result);
+        
     });
-
+    console.log(results);
     return results;
 }
 
@@ -282,7 +284,8 @@ async function main() {
     results = runSwearJar(data);
     await addToCsv(CsvColumnName.SwearjarOutput, results);
 
-    //await runCensorSensor(data); doesnt work, idk why it doesnt recongize the function used for this package
+    results = runCensorSensor(data);
+    await addToCsv(CsvColumnName.CensorSensorOutput, results);
 
     results = runSpamDetection(data);
     await addToCsv(CsvColumnName.SpamDetectionOutput, results);
