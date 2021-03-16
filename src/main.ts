@@ -7,6 +7,7 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 const { Parser } = require('json2csv');
+const spamcheck = require('spam-detection');
 
 enum CsvColumnName {
     TestCase = "testCase",
@@ -18,8 +19,8 @@ enum CsvColumnName {
     SpamCheckOutput = "spam-check_output",
     AkismetApiRuntime = "akismet-api_runtime",
     AkismetApiOutput = "akismet-api_output",
-    SpamDectectorRuntime = "spam_dectector_runtime",
-    SpamDectectorOutput = "spam_dectector_output",
+    SpamDetectionRuntime = "spam_detection_runtime",
+    SpamDetectionOutput = "spam_detection_output",
     SpamcRuntime = "spamc_runtime",
     SpamcOutput = "spamc_output",
     BadWordsRuntime = "bad-words_runtime",
@@ -55,19 +56,22 @@ function importData(): string[] {
  * @param columnName The column name to add the data to.
  * @param columnValues The data to add.
  */
-function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
-    const allData: string[] = [];
-    fs.createReadStream('./data/result.csv')
-        .pipe(csv())
-        .on('data', function (data: any) {
-            data[columnName] = columnValues[Number(data.testCase)];
-            allData.push(data);
-        })
-        .on('end', function(){
-            const parser = new Parser({ fields: Object.keys(allData[0]) });
-            const newCsv = parser.parse(allData);
-            fs.writeFileSync('./data/result.csv', newCsv);
-        });
+function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
+    return new Promise<void>((resolve) => {
+        const allData: string[] = [];
+        fs.createReadStream('./data/result.csv')
+            .pipe(csv())
+            .on('data', function (data: any) {
+                data[columnName] = columnValues[Number(data.testCase)];
+                allData.push(data);
+            })
+            .on('end', function(){
+                const parser = new Parser({ fields: Object.keys(allData[0]) });
+                const newCsv = parser.parse(allData);
+                fs.writeFileSync('./data/result.csv', newCsv);
+                resolve();
+            });
+    })
 }
 
 // TODO: Implement https://www.npmjs.com/package/spam-filter
@@ -79,8 +83,17 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 // TODO: Implement: https://www.npmjs.com/package/akismet-api
 // Full Nodejs bindings to the Akismet (https://akismet.com) spam detection service.
 
-// TODO: Implement: https://www.npmjs.com/package/spam_detecter
+/**
+ * Implement: https://www.npmjs.com/package/spam-detection
 // Small package based on Naive Bayes classifier to classify messages as spam or ham.
+ * @param data The data.
+ */
+async function runSpamDetection(data: string[]) {
+    const results = data.map((value) => {
+        return spamcheck.detect(value);
+    });
+    await addToCsv(CsvColumnName.SpamDetectionOutput, results);
+}
 
 // TODO: Implement: https://www.npmjs.com/package/spamc
 // spamc is a nodejs module that connects to spamassassin's spamd daemon using the spamc interface.
@@ -112,8 +125,9 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]): void {
 /**
  * The main function.
  */
-function main() {
-    importData();
+async function main() {
+    const data = importData();
+    await runSpamDetection(data);
 }
 
 main();
