@@ -205,8 +205,8 @@ function runSwearJar(data: string[]) {
  * @param data is the array of test cases to be ran through the filter
  * @returns Array of valid or spam results for each test case.
  */
- async function runCensorSensor(data: string[]) {
-    const censorSensorArray = data.map((testCase: string) => {
+function runCensorSensor(data: string[]) {
+    const results = data.map((testCase: string) => {
         let result = censorSensor.isProfane(testCase)
 
         if (result == true) {
@@ -217,8 +217,9 @@ function runSwearJar(data: string[]) {
         }
 
         console.log(result);
-     });
-    await addToCsv(CsvColumnName.CensorSensorOutput, censorSensorArray);
+    });
+
+    return results;
 }
 
 /**
