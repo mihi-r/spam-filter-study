@@ -117,7 +117,7 @@ function runSpamFilter(data: string[]): [string[], string[]] {
 
 /**
  * Implement: https://www.npmjs.com/package/spam-check
-// A simple node module for checking for spam in user inputs
+ * A simple node module for checking for spam in user inputs
  * @param data The data.
  * @returns Array of [results, times in nanoseconds]
  */
@@ -139,9 +139,6 @@ function runSpamCheck(data: string[]): [string[], string[]] {
     return [results, times];
 }
 
-// TODO: Implement: https://www.npmjs.com/package/akismet-api
-// Full Nodejs bindings to the Akismet (https://akismet.com) spam detection service.
-
 /**
  * Implement: https://www.npmjs.com/package/spam-detection
  * Small package based on Naive Bayes classifier to classify messages as spam or ham.
@@ -162,22 +159,6 @@ function runSpamDetection(data: string[]): [string[], string[]] {
 
     return [results, times];
 }
-
-
-// TODO: Implement: https://www.npmjs.com/package/spamc
-// spamc is a nodejs module that connects to spamassassin's spamd daemon using the spamc interface.
-
-// function runSpamc(data: string[]): void{
-//     const Spamc = new spamc();
-//     // const results = data.map((testCase: string) => {
-        
-//     // });
-//     Spamc.report(data[0], function (result: string[]) {
-//         console.log(result)
-//     })
-
-
-// }
 
 /**
  * Implement: https://www.npmjs.com/package/bad-words
@@ -255,7 +236,6 @@ function runRetextProfanities(data: string[]): [string[], string[]] {
  */
 function runSwearJar(data: string[]): [string[], string[]] {
     const times: string[] = [];
-
     const results = data.map((testCase: string) => {
         const start = process.hrtime();
         const result = swearjar.profane(testCase);
@@ -281,10 +261,14 @@ function runSwearJar(data: string[]): [string[], string[]] {
  * @returns Array of [results, times in nanoseconds]
  */
 function runCensorSensor(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const censor = new censorSensor.CensorSensor();
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = censor.isProfane(testCase)
-
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        
         if (result == true) {
             return "spam"
         }
@@ -294,7 +278,7 @@ function runCensorSensor(data: string[]): [string[], string[]] {
 
         
     });
-    return results;
+    return [results, times];
 }
 
 /**
@@ -303,9 +287,12 @@ function runCensorSensor(data: string[]): [string[], string[]] {
  * @returns Array of [results, times in nanoseconds]
  */
 function runNoSwearing(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = noSwearing(testCase);
-
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
         if (result.length == 0) {
             return "valid"
         }
@@ -314,7 +301,7 @@ function runNoSwearing(data: string[]): [string[], string[]] {
         }
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -323,17 +310,23 @@ function runNoSwearing(data: string[]): [string[], string[]] {
  * @returns Array of [results, times in nanoseconds]
  */
 function runProfanease(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     let isProfane = new Profanease({lang : 'all'});
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         if (isProfane.check(testCase) == true) {
-            return "spam"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "spam";
         }
         if (isProfane.check(testCase) == false) {
-            return "valid"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "valid";
         }
     });
     
-    return results;
+    return [results, times];
 }
 
 /**
@@ -342,23 +335,25 @@ function runProfanease(data: string[]): [string[], string[]] {
  * @returns Array of [results, times in nanoseconds]
  */
  function runBadWordsFilter(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const config = {list: googleProfanityWords.list()}
     const filter = new Filter(config);
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         if (filter.isUnclean(testCase) == true) {
-            return "spam"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "spam";
         }
         if (filter.isUnclean(testCase) == false) {
-            return "valid"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "valid";
         }
     });
     
-    return results;
+    return [results, times];
 }
-
-
-// TODO: Implement: https://npm.io/package/google-profanity-words
-// Full List of Bad Words and Top Swear Words Banned by Google. As they closed the api (will most likely be used in conjuntion with other spam filters)
 
 /**
  * The main function.
@@ -374,7 +369,7 @@ async function main() {
 
     results = runNoSwearing(data);
     await addToCsv(CsvColumnName.NoswearingOutput, results[0]);
-    await addToCsv(CsvColumnName.NoswearingRuntime, results[1])
+    await addToCsv(CsvColumnName.NoswearingRuntime, results[1]);
 
     results = runSwearJar(data);
     await addToCsv(CsvColumnName.SwearjarOutput, results[0]);
@@ -410,7 +405,7 @@ async function main() {
 
     results = runBadWordsFilter(data);
     await addToCsv(CsvColumnName.BadWordsFilterOutput, results[0]);
-    await addToCsv(CsvColumnName.BadWordsFilterRuntime, results[1])
+    await addToCsv(CsvColumnName.BadWordsFilterRuntime, results[1]);
 }
 
 main();
