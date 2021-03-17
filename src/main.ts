@@ -296,6 +296,7 @@ function runProfanease(data: string[]) {
 /**
  * An easy-to-use word filter with advanced detection techniques. A lightweight package with zero dependencies.
  * @param data is the array of test cases to be ran through the filter
+ * @returns Array of valid or spam results for each test case.
  */
  function runBadWordsFilter(data: string[]) {
     const config = {list: googleProfanityWords.list()}
