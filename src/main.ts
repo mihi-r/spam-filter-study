@@ -251,9 +251,8 @@ function runRetextProfanities(data: string[]) {
  * @param data is the array of test cases to be ran through the filter
  * @returns Array of valid or spam results for each test case.
  */
-function runSwearJar(data: string[]) {
+function runSwearJar(data: string[]): [string[], string[]] {
     const times: string[] = [];
-
     const results = data.map((testCase: string) => {
         const start = process.hrtime();
         const result = swearjar.profane(testCase);
@@ -278,11 +277,15 @@ function runSwearJar(data: string[]) {
  * @param data is the array of test cases to be ran through the filter
  * @returns Array of valid or spam results for each test case.
  */
-function runCensorSensor(data: string[]) {
+function runCensorSensor(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const censor = new censorSensor.CensorSensor();
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = censor.isProfane(testCase)
-
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        
         if (result == true) {
             return "spam"
         }
@@ -292,7 +295,7 @@ function runCensorSensor(data: string[]) {
 
         
     });
-    return results;
+    return [results, times];
 }
 
 /**
@@ -300,10 +303,13 @@ function runCensorSensor(data: string[]) {
  * @param data is the array of test cases to be ran through the filter
  * @returns Array of valid or spam results for each test case.
  */
-function runNoSwearing(data: string[]) {
+function runNoSwearing(data: string[]): [string[], string[]] { {
+    const times: string[] = [];
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = noSwearing(testCase);
-
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
         if (result.length == 0) {
             return "valid"
         }
@@ -312,7 +318,7 @@ function runNoSwearing(data: string[]) {
         }
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -320,18 +326,24 @@ function runNoSwearing(data: string[]) {
  * @param data is the array of test cases to be ran through the filter
  * @returns Array of valid or spam results for each test case.
  */
-function runProfanease(data: string[]) {
+function runProfanease(data: string[]): [string[], string[]] { {
+    const times: string[] = [];
     let isProfane = new Profanease({lang : 'all'});
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         if (isProfane.check(testCase) == true) {
-            return "spam"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "spam";
         }
         if (isProfane.check(testCase) == false) {
-            return "valid"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "valid";
         }
     });
     
-    return results;
+    return [results, times];
 }
 
 /**
@@ -339,19 +351,25 @@ function runProfanease(data: string[]) {
  * @param data is the array of test cases to be ran through the filter
  * @returns Array of valid or spam results for each test case.
  */
- function runBadWordsFilter(data: string[]) {
+ function runBadWordsFilter(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const config = {list: googleProfanityWords.list()}
     const filter = new Filter(config);
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         if (filter.isUnclean(testCase) == true) {
-            return "spam"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "spam";
         }
         if (filter.isUnclean(testCase) == false) {
-            return "valid"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "valid";
         }
     });
     
-    return results;
+    return [results, times];
 }
 
 
@@ -367,16 +385,19 @@ async function main() {
     let results: [string[], string[]];
 
     results = runProfanease(data);
-    await addToCsv(CsvColumnName.ProfaneaseOutput, results);
+    await addToCsv(CsvColumnName.ProfaneaseOutput, results[0]);
+    await addToCsv(CsvColumnName.ProfaneaseRuntime, results[1]);
 
     results = runNoSwearing(data);
-    await addToCsv(CsvColumnName.NoswearingOutput, results);
+    await addToCsv(CsvColumnName.NoswearingOutput, results[0]);
+    await addToCsv(CsvColumnName.NoswearingRuntime, results[1]);
 
     results = runSwearJar(data);
     await addToCsv(CsvColumnName.SwearjarOutput, results);
 
     results = runCensorSensor(data);
-    await addToCsv(CsvColumnName.CensorSensorOutput, results);
+    await addToCsv(CsvColumnName.CensorSensorOutput, results[0]);
+    await addToCsv(CsvColumnName.CensorSensorRuntime, results[1]);
 
     results = runSpamDetection(data);
     await addToCsv(CsvColumnName.SpamDetectionOutput, results);
@@ -398,7 +419,8 @@ async function main() {
     await addToCsv(CsvColumnName.SpamCheckOutput, results);
 
     results = runBadWordsFilter(data);
-    await addToCsv(CsvColumnName.BadWordsFilterOutput, results);
+    await addToCsv(CsvColumnName.BadWordsFilterOutput, results[0]);
+    await addToCsv(CsvColumnName.BadWordsFilterRuntime, results[1]);
 }
 
 main();
