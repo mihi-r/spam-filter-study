@@ -27,6 +27,8 @@ const spamCheck = require('spam-check');
 const Filter = require("badwords-filter");
 
 
+const NS_PER_SEC = 1e9;
+
 enum CsvColumnName {
     TestCase = "testCase",
     TestLength = "testLength",
@@ -98,126 +100,147 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
  * Implement https://www.npmjs.com/package/spam-filter
  * This spam filter lets you choose between using naive Bayes classifier or Fisher's method.
  * @param data The data.
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runSpamFilter(data: string[]) {
+function runSpamFilter(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase) => {
-        return filter.isSpam(testCase) ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result = filter.isSpam(testCase) ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
  * Implement: https://www.npmjs.com/package/spam-check
-// A simple node module for checking for spam in user inputs
+ * A simple node module for checking for spam in user inputs
  * @param data The data.
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runSpamCheck(data: string[]) {
+function runSpamCheck(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase) => {
         let result: string = '';
 
+        const start = process.hrtime();
         spamCheck({ 'string':testCase }, function(_err: any, checkResult: { spam: boolean }) {
             result = checkResult.spam ? 'spam' : 'valid';
         });
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+    
         return result;
     });
 
-    return results;
+    return [results, times];
 }
-
-// TODO: Implement: https://www.npmjs.com/package/akismet-api
-// Full Nodejs bindings to the Akismet (https://akismet.com) spam detection service.
 
 /**
  * Implement: https://www.npmjs.com/package/spam-detection
  * Small package based on Naive Bayes classifier to classify messages as spam or ham.
  * @param data The data.
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runSpamDetection(data: string[]) {
+function runSpamDetection(data: string[]): [string[], string[]] {
+    const times: string[] = [];
+
     const results = data.map((value) => {
-        return spamcheck.detect(value) === 'spam' ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result = spamcheck.detect(value) === 'spam' ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+
+        return result;
     });
-    return results;
+
+    return [results, times];
 }
-
-
-// TODO: Implement: https://www.npmjs.com/package/spamc
-// spamc is a nodejs module that connects to spamassassin's spamd daemon using the spamc interface.
-
-// function runSpamc(data: string[]): void{
-//     const Spamc = new spamc();
-//     // const results = data.map((testCase: string) => {
-        
-//     // });
-//     Spamc.report(data[0], function (result: string[]) {
-//         console.log(result)
-//     })
-
-
-// }
 
 /**
  * Implement: https://www.npmjs.com/package/bad-words
  * A javascript filter for badwords
  * @param data The array of test cases to test the package
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */ 
-function runBadWords(data: string[]) {
+function runBadWords(data: string[]): [string[], string[]] {
+    const times: string[] = [];
+
     const bad_words = new badWords();
     const results = data.map((testCase: string) => {
-        return (bad_words.isProfane(testCase)) ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result =  (bad_words.isProfane(testCase)) ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+
+        return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
  * Implement: https://www.npmjs.com/package/leo-profanity
  * Profanity filter, based on "Shutterstock" dictionary
  * @param data The array of test cases to test the package
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */ 
-function runLeoProfanity(data: string[]) {
+function runLeoProfanity(data: string[]): [string[], string[]] {
+    const times: string[] = [];
+
     const results = data.map((testCase: string) => {
-        return (leo.check(testCase)) ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result = (leo.check(testCase)) ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
  * Implement: https://npm.io/package/retext-profanities
  * retext plugin to check for profane and vulgar wording. Uses cuss for sureness.
  * @param data The array of test cases to test the package
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */ 
-function runRetextProfanities(data: string[]) {
+function runRetextProfanities(data: string[]): [string[], string[]] {
     const results: string[] = [];
-    data.forEach(testCase =>
+    const times: string[] = [];
+
+    data.forEach(testCase => {
         unified()
         .use(english)
         .use(profanities)
         .use(stringify)
-        .process(testCase, function(err: string, output: string) {
+        .process(testCase, function(_err: string, output: string) {
             const warnings = new RegExp(/\bwarnings|warning\b/g);
+            const start = process.hrtime();
             results.push((warnings.test(report(output))) ? 'spam' : 'valid');
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));   
         })
-    );
+    });
 
-    return results;
+    return [results, times];
 }
 
 /**
  * Profanity detection and filtering library.
  * @param data is the array of test cases to be ran through the filter
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runSwearJar(data: string[]) {
+function runSwearJar(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = swearjar.profane(testCase);
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
 
         if (result == true) {
             return "spam"
@@ -229,19 +252,23 @@ function runSwearJar(data: string[]) {
         console.log(result);
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
  * A better profanity filter.
  * @param data is the array of test cases to be ran through the filter
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runCensorSensor(data: string[]) {
+function runCensorSensor(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const censor = new censorSensor.CensorSensor();
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = censor.isProfane(testCase)
-
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        
         if (result == true) {
             return "spam"
         }
@@ -251,18 +278,21 @@ function runCensorSensor(data: string[]) {
 
         
     });
-    return results;
+    return [results, times];
 }
 
 /**
  * An advanced profanity filter based on English phonetics (how stuff sounds).
  * @param data is the array of test cases to be ran through the filter
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runNoSwearing(data: string[]) {
+function runNoSwearing(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = noSwearing(testCase);
-
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
         if (result.length == 0) {
             return "valid"
         }
@@ -271,51 +301,59 @@ function runNoSwearing(data: string[]) {
         }
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
  * A lightweight javascript detector and filter for profanity words / bad words written in typescript
  * @param data is the array of test cases to be ran through the filter
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runProfanease(data: string[]) {
+function runProfanease(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     let isProfane = new Profanease({lang : 'all'});
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         if (isProfane.check(testCase) == true) {
-            return "spam"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "spam";
         }
         if (isProfane.check(testCase) == false) {
-            return "valid"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "valid";
         }
     });
     
-    return results;
+    return [results, times];
 }
 
 /**
  * An easy-to-use word filter with advanced detection techniques. A lightweight package with zero dependencies.
  * @param data is the array of test cases to be ran through the filter
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
- function runBadWordsFilter(data: string[]) {
+ function runBadWordsFilter(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const config = {list: googleProfanityWords.list()}
     const filter = new Filter(config);
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         if (filter.isUnclean(testCase) == true) {
-            return "spam"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "spam";
         }
         if (filter.isUnclean(testCase) == false) {
-            return "valid"
+            const diff = process.hrtime(start);
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+            return "valid";
         }
     });
     
-    return results;
+    return [results, times];
 }
-
-
-// TODO: Implement: https://npm.io/package/google-profanity-words
-// Full List of Bad Words and Top Swear Words Banned by Google. As they closed the api (will most likely be used in conjuntion with other spam filters)
 
 /**
  * The main function.
@@ -323,40 +361,51 @@ function runProfanease(data: string[]) {
  */
 async function main() {
     const data = importData();
-    let results: string[];
+    let results: [string[], string[]];
 
     results = runProfanease(data);
-    await addToCsv(CsvColumnName.ProfaneaseOutput, results);
+    await addToCsv(CsvColumnName.ProfaneaseOutput, results[0]);
+    await addToCsv(CsvColumnName.ProfaneaseRuntime, results[1]);
 
     results = runNoSwearing(data);
-    await addToCsv(CsvColumnName.NoswearingOutput, results);
+    await addToCsv(CsvColumnName.NoswearingOutput, results[0]);
+    await addToCsv(CsvColumnName.NoswearingRuntime, results[1]);
 
     results = runSwearJar(data);
-    await addToCsv(CsvColumnName.SwearjarOutput, results);
+    await addToCsv(CsvColumnName.SwearjarOutput, results[0]);
+    await addToCsv(CsvColumnName.SwearjarRuntime, results[1]);
 
     results = runCensorSensor(data);
-    await addToCsv(CsvColumnName.CensorSensorOutput, results);
+    await addToCsv(CsvColumnName.CensorSensorOutput, results[0]);
+    await addToCsv(CsvColumnName.CensorSensorRuntime, results[1]);
 
     results = runSpamDetection(data);
-    await addToCsv(CsvColumnName.SpamDetectionOutput, results);
+    await addToCsv(CsvColumnName.SpamDetectionOutput, results[0]);
+    await addToCsv(CsvColumnName.SpamDetectionRuntime, results[1]);
 
     results = runBadWords(data);
-    await addToCsv(CsvColumnName.BadWordsOutput, results);
+    await addToCsv(CsvColumnName.BadWordsOutput, results[0]);
+    await addToCsv(CsvColumnName.BadWordsRuntime, results[1]);
 
     results = runLeoProfanity(data);
-    await addToCsv(CsvColumnName.LeoProfanitiesOutput, results);
+    await addToCsv(CsvColumnName.LeoProfanitiesOutput, results[0]);
+    await addToCsv(CsvColumnName.LeoProfanitiesRuntime, results[1]);
 
     results = runRetextProfanities(data);
-    await addToCsv(CsvColumnName.RetextProfanitiesOutput, results);
+    await addToCsv(CsvColumnName.RetextProfanitiesOutput, results[0]);
+    await addToCsv(CsvColumnName.RetextProfanitiesRuntime, results[1]);
 
     results = runSpamFilter(data);
-    await addToCsv(CsvColumnName.SpamFilterOutput, results);
+    await addToCsv(CsvColumnName.SpamFilterOutput, results[0]);
+    await addToCsv(CsvColumnName.SpamFilterRuntime, results[1]);
 
     results = runSpamCheck(data);
-    await addToCsv(CsvColumnName.SpamCheckOutput, results);
+    await addToCsv(CsvColumnName.SpamCheckOutput, results[0]);
+    await addToCsv(CsvColumnName.SpamCheckRuntime, results[1])
 
     results = runBadWordsFilter(data);
-    await addToCsv(CsvColumnName.BadWordsFilterOutput, results);
+    await addToCsv(CsvColumnName.BadWordsFilterOutput, results[0]);
+    await addToCsv(CsvColumnName.BadWordsFilterRuntime, results[1]);
 }
 
 main();
