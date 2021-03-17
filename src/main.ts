@@ -212,7 +212,7 @@ function runRetextProfanities(data: string[]): [string[], string[]] {
     const results: string[] = [];
     const times: string[] = [];
 
-    data.forEach(testCase =>
+    data.forEach(testCase => {
         unified()
         .use(english)
         .use(profanities)
@@ -222,9 +222,9 @@ function runRetextProfanities(data: string[]): [string[], string[]] {
             const start = process.hrtime();
             results.push((warnings.test(report(output))) ? 'spam' : 'valid');
             const diff = process.hrtime(start);
-            times.push(String(diff[0] * NS_PER_SEC * diff[1]));
+            times.push(String(diff[0] * NS_PER_SEC + diff[1]));   
         })
-    );
+    });
 
     return [results, times];
 }
