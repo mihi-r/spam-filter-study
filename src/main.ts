@@ -217,7 +217,7 @@ function runRetextProfanities(data: string[]): [string[], string[]] {
         .use(english)
         .use(profanities)
         .use(stringify)
-        .process(testCase, function(err: string, output: string) {
+        .process(testCase, function(_err: string, output: string) {
             const warnings = new RegExp(/\bwarnings|warning\b/g);
             const start = process.hrtime();
             results.push((warnings.test(report(output))) ? 'spam' : 'valid');
