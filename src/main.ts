@@ -24,6 +24,8 @@ const { Parser } = require('json2csv');
 const spamcheck = require('spam-detection');
 const filter = require('spam-filter')();
 const spamCheck = require('spam-check');
+const Filter = require("badwords-filter");
+
 
 enum CsvColumnName {
     TestCase = "testCase",
@@ -52,7 +54,9 @@ enum CsvColumnName {
     NoswearingRuntime = "noswearing_runtime",
     NoswearingOutput = "noswearing_output",
     ProfaneaseRuntime = "profanease_runtime",
-    ProfaneaseOutput = "profanease_output"
+    ProfaneaseOutput = "profanease_output",
+    BadWordsFilterOutput = "badwords-filter_output",
+    BadWordsFilterRuntime = "badwords-filter_runtime"
 }
 
 /**
@@ -289,6 +293,25 @@ function runProfanease(data: string[]) {
     return results;
 }
 
+/**
+ * An easy-to-use word filter with advanced detection techniques. A lightweight package with zero dependencies.
+ * @param data is the array of test cases to be ran through the filter
+ */
+ function runBadWordsFilter(data: string[]) {
+    const config = {list: googleProfanityWords.list()}
+    const filter = new Filter(config);
+    const results = data.map((testCase: string) => {
+        if (filter.isUnclean(testCase) == true) {
+            return "spam"
+        }
+        if (filter.isUnclean(testCase) == false) {
+            return "valid"
+        }
+    });
+    
+    return results;
+}
+
 
 // TODO: Implement: https://npm.io/package/google-profanity-words
 // Full List of Bad Words and Top Swear Words Banned by Google. As they closed the api (will most likely be used in conjuntion with other spam filters)
@@ -330,6 +353,9 @@ async function main() {
 
     results = runSpamCheck(data);
     await addToCsv(CsvColumnName.SpamCheckOutput, results);
+
+    results = runBadWordsFilter(data);
+    await addToCsv(CsvColumnName.BadWordsFilterOutput, results);
 }
 
 main();
