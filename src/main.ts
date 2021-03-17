@@ -27,6 +27,8 @@ const spamCheck = require('spam-check');
 const Filter = require("badwords-filter");
 
 
+const NS_PER_SEC = 1e9;
+
 enum CsvColumnName {
     TestCase = "testCase",
     TestLength = "testLength",
@@ -98,14 +100,19 @@ function addToCsv(columnName: CsvColumnName, columnValues: string[]) {
  * Implement https://www.npmjs.com/package/spam-filter
  * This spam filter lets you choose between using naive Bayes classifier or Fisher's method.
  * @param data The data.
- * @returns Array of valid or spam results for each test case.
+ * @returns Array of [results, times in nanoseconds]
  */
-function runSpamFilter(data: string[]) {
+function runSpamFilter(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase) => {
-        return filter.isSpam(testCase) ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result = filter.isSpam(testCase) ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -114,17 +121,22 @@ function runSpamFilter(data: string[]) {
  * @param data The data.
  * @returns Array of valid or spam results for each test case.
  */
-function runSpamCheck(data: string[]) {
+function runSpamCheck(data: string[]): [string[], string[]] {
+    const times: string[] = [];
     const results = data.map((testCase) => {
         let result: string = '';
 
+        const start = process.hrtime();
         spamCheck({ 'string':testCase }, function(_err: any, checkResult: { spam: boolean }) {
             result = checkResult.spam ? 'spam' : 'valid';
         });
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+    
         return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 // TODO: Implement: https://www.npmjs.com/package/akismet-api
@@ -136,11 +148,19 @@ function runSpamCheck(data: string[]) {
  * @param data The data.
  * @returns Array of valid or spam results for each test case.
  */
-function runSpamDetection(data: string[]) {
+function runSpamDetection(data: string[]): [string[], string[]] {
+    const times: string[] = [];
+
     const results = data.map((value) => {
-        return spamcheck.detect(value) === 'spam' ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result = spamcheck.detect(value) === 'spam' ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+
+        return result;
     });
-    return results;
+
+    return [results, times];
 }
 
 
@@ -166,12 +186,19 @@ function runSpamDetection(data: string[]) {
  * @returns Array of valid or spam results for each test case.
  */ 
 function runBadWords(data: string[]) {
+    const times: string[] = [];
+
     const bad_words = new badWords();
     const results = data.map((testCase: string) => {
-        return (bad_words.isProfane(testCase)) ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result =  (bad_words.isProfane(testCase)) ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+
+        return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -181,11 +208,17 @@ function runBadWords(data: string[]) {
  * @returns Array of valid or spam results for each test case.
  */ 
 function runLeoProfanity(data: string[]) {
+    const times: string[] = [];
+
     const results = data.map((testCase: string) => {
-        return (leo.check(testCase)) ? 'spam' : 'valid';
+        const start = process.hrtime();
+        const result = (leo.check(testCase)) ? 'spam' : 'valid';
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        return result;
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -196,6 +229,9 @@ function runLeoProfanity(data: string[]) {
  */ 
 function runRetextProfanities(data: string[]) {
     const results: string[] = [];
+    const times: string[] = [];
+
+    // TODO: Time this
     data.forEach(testCase =>
         unified()
         .use(english)
@@ -207,7 +243,7 @@ function runRetextProfanities(data: string[]) {
         })
     );
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -216,8 +252,13 @@ function runRetextProfanities(data: string[]) {
  * @returns Array of valid or spam results for each test case.
  */
 function runSwearJar(data: string[]) {
+    const times: string[] = [];
+
     const results = data.map((testCase: string) => {
+        const start = process.hrtime();
         const result = swearjar.profane(testCase);
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
 
         if (result == true) {
             return "spam"
@@ -229,7 +270,7 @@ function runSwearJar(data: string[]) {
         console.log(result);
     });
 
-    return results;
+    return [results, times];
 }
 
 /**
@@ -323,7 +364,7 @@ function runProfanease(data: string[]) {
  */
 async function main() {
     const data = importData();
-    let results: string[];
+    let results: [string[], string[]];
 
     results = runProfanease(data);
     await addToCsv(CsvColumnName.ProfaneaseOutput, results);
@@ -350,7 +391,8 @@ async function main() {
     await addToCsv(CsvColumnName.RetextProfanitiesOutput, results);
 
     results = runSpamFilter(data);
-    await addToCsv(CsvColumnName.SpamFilterOutput, results);
+    await addToCsv(CsvColumnName.SpamFilterOutput, results[0]);
+    await addToCsv(CsvColumnName.SpamFilterRuntime, results[1]);
 
     results = runSpamCheck(data);
     await addToCsv(CsvColumnName.SpamCheckOutput, results);
