@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "bad-words": "^3.0.4",
+    "badwords-filter": "^1.0.0",
     "censor-sensor": "^1.0.6",
     "csv-parser": "^3.0.0",
     "google-profanity-words": "^1.0.0",
