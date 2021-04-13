@@ -314,14 +314,13 @@ function runProfanease(data: string[]): [string[], string[]] {
     let isProfane = new Profanease({lang : 'all'});
     const results = data.map((testCase: string) => {
         const start = process.hrtime();
-        if (isProfane.check(testCase) == true) {
-            const diff = process.hrtime(start);
-            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        const isSpam = isProfane.check(testCase);
+        const diff = process.hrtime(start);
+        times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        if (isSpam == true) {            
             return "spam";
         }
-        if (isProfane.check(testCase) == false) {
-            const diff = process.hrtime(start);
-            times.push(String(diff[0] * NS_PER_SEC + diff[1]));
+        if (isSpam == false) {
             return "valid";
         }
     });
